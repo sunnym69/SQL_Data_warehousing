@@ -1,1 +1,147 @@
+%sql
+CREATE CATALOG IF NOT EXISTS datawarehouse;
+%sql
+CREATE SCHEMA IF NOT EXISTS datawarehouse.bronze;
 
+CREATE SCHEMA IF NOT EXISTS datawarehouse.silver;
+
+CREATE SCHEMA IF NOT EXISTS datawarehouse.gold;
+%sql
+SHOW SCHEMAS IN datawarehouse;
+%sql
+SHOW CATALOGS;
+
+%sql
+
+-- =============================================================
+-- BRONZE LAYER: Load CSV files into Delta tables
+-- =============================================================
+
+
+-- 1. CRM Customer Information
+CREATE OR REPLACE TABLE datawarehouse.bronze.crm_cust_info
+USING DELTA
+AS
+SELECT *
+FROM read_files(
+    '/Volumes/datawarehouse/bronze/raw_data/cust_info.csv',
+    format => 'csv',
+    header => true
+);
+
+
+-- 2. CRM Product Information
+CREATE OR REPLACE TABLE datawarehouse.bronze.crm_prd_info
+USING DELTA
+AS
+SELECT *
+FROM read_files(
+    '/Volumes/datawarehouse/bronze/raw_data/prd_info.csv',
+    format => 'csv',
+    header => true
+);
+
+
+-- 3. CRM Sales Details
+CREATE OR REPLACE TABLE datawarehouse.bronze.crm_sales_details
+USING DELTA
+AS
+SELECT *
+FROM read_files(
+    '/Volumes/datawarehouse/bronze/raw_data/sales_details.csv',
+    format => 'csv',
+    header => true
+);
+
+
+-- 4. ERP Location
+CREATE OR REPLACE TABLE datawarehouse.bronze.erp_loc_a101
+USING DELTA
+AS
+SELECT *
+FROM read_files(
+    '/Volumes/datawarehouse/bronze/raw_data/LOC_A101.csv',
+    format => 'csv',
+    header => true
+);
+
+
+-- 5. ERP Customer
+CREATE OR REPLACE TABLE datawarehouse.bronze.erp_cust_az12
+USING DELTA
+AS
+SELECT *
+FROM read_files(
+    '/Volumes/datawarehouse/bronze/raw_data/CUST_AZ12.csv',
+    format => 'csv',
+    header => true
+);
+
+
+-- 6. ERP Product Category
+CREATE OR REPLACE TABLE datawarehouse.bronze.erp_px_cat_g1v2
+USING DELTA
+AS
+SELECT *
+FROM read_files(
+    '/Volumes/datawarehouse/bronze/raw_data/PX_CAT_G1V2.csv',
+    format => 'csv',
+    header => true
+);
+%sql
+
+SHOW TABLES IN datawarehouse.bronze;
+%sql
+
+SELECT 'crm_cust_info' AS table_name, COUNT(*) AS row_count
+FROM datawarehouse.bronze.crm_cust_info
+
+UNION ALL
+
+SELECT 'crm_prd_info', COUNT(*)
+FROM datawarehouse.bronze.crm_prd_info
+
+UNION ALL
+
+SELECT 'crm_sales_details', COUNT(*)
+FROM datawarehouse.bronze.crm_sales_details
+
+UNION ALL
+
+SELECT 'erp_loc_a101', COUNT(*)
+FROM datawarehouse.bronze.erp_loc_a101
+
+UNION ALL
+
+SELECT 'erp_cust_az12', COUNT(*)
+FROM datawarehouse.bronze.erp_cust_az12
+
+UNION ALL
+
+SELECT 'erp_px_cat_g1v2', COUNT(*)
+FROM datawarehouse.bronze.erp_px_cat_g1v2;
+%sql
+select *
+from datawarehouse.bronze.crm_cust_info
+limit 10
+
+%sql
+select * 
+from datawarehouse.bronze.crm_prd_info
+limit 10
+%sql
+select *
+from datawarehouse.bronze.crm_sales_details
+limit 10
+%sql
+select *
+from datawarehouse.bronze.erp_cust_az12
+limit 10
+%sql
+select *
+from datawarehouse.bronze.erp_loc_a101
+limit 10
+%sql
+select *
+from datawarehouse.bronze.erp_px_cat_g1v2
+limit 10
